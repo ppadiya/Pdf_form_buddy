@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<h2>User Profile for {{ username }}</h2>
+
+<div>
+    <h3>Personal Details</h3>
+    <p>Given Name: {{ profile.given_name }}</p>
+    <p>Last Name: {{ profile.last_name }}</p>
+    
+    <h3>Contact Details</h3>
+    <p>Mobile Number: {{ profile.mobile_number }}</p>
+    <p>Email Address: {{ profile.email_address }}</p>
+    
+    <h3>Address</h3>
+    <p>Address Line 1: {{ profile.address_line1 }}</p>
+    <p>Address Line 2: {{ profile.address_line2 }}</p>
+    <p>Address Line 3: {{ profile.address_line3 }}</p>
+    <p>Address Line 4: {{ profile.address_line4 }}</p>
+    <p>City: {{ profile.city }}</p>
+    <p>State: {{ profile.state }}</p>
+    <p>Country: {{ profile.country }}</p>
+    <p>Post Code: {{ profile.post_code }}</p>
+    
+    <h3>Additional Details</h3>
+    <p>Date of Birth: {{ profile.date_of_birth }}</p>
+    <p>Passport Number: {{ profile.passport_number }}</p>
+    <p>Gender: {{ profile.gender }}</p>
+    <p>Ethnicity: {{ profile.ethnicity }}</p>
+    <p>Religion: {{ profile.religion }}</p>
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('edit_profile') }}" class="btn">Edit Profile</a>
+    <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+</div>
+{% endblock %}

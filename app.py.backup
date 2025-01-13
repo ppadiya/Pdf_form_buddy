@@ -1,0 +1,136 @@
+    # app.py
+    from flask import Flask, render_template, request, redirect, url_for, session, flash
+    from database import create_user, validate_user, save_user_profile, get_user_profile, get_db_connection
+    import sqlite3
+    import pycountry
+
+    app = Flask(__name__)
+    app.secret_key = 'your_secret_key_here'  # Change this to a random secret key
+
+
+    def get_country_list():
+        """
+        Retrieve a sorted list of country names
+        Returns a list of country names sorted alphabetically
+        """
+        return sorted([country.name for country in pycountry.countries])
+
+    @app.route('/')
+    def home():
+        return render_template('login.html')
+
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            
+            try:
+                create_user(username, password)
+                return redirect(url_for('login'))
+            except sqlite3.IntegrityError:
+                return "Username already exists. Please choose another."
+        
+        return render_template('register.html')
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            
+            if validate_user(username, password):
+                session['username'] = username
+                return redirect(url_for('profile'))
+            else:
+                return "Invalid username or password"
+        
+        return render_template('login.html')
+
+    @app.route('/profile', methods=['GET'])
+    def view_profile():
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        
+        # Get the user ID for the logged-in user
+        conn = get_db_connection()
+        user = conn.execute('SELECT id FROM users WHERE username = ?', 
+                            (session['username'],)).fetchone()
+        conn.close()
+        
+        if not user:
+            return redirect(url_for('login'))
+        
+        user_id = user['id']
+        
+        # Retrieve existing profile
+        profile = get_user_profile(user_id)
+        
+        if request.method == 'GET':
+            return render_template('view_profile.html', username=session['username'], profile=profile)
+
+    @app.route('/profile/edit', methods=['GET', 'POST'])
+    def edit_profile():
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        
+        # Get the user ID for the logged-in user
+        conn = get_db_connection()
+        user = conn.execute('SELECT id FROM users WHERE username = ?', 
+                            (session['username'],)).fetchone()
+        conn.close()
+        
+        if not user:
+            return redirect(url_for('login'))
+        
+        user_id = user['id']
+        
+        if request.method == 'POST':
+            try:
+                # Collect all form data
+                profile_data = {
+                    'given_name': request.form.get('given_name'),
+                    'last_name': request.form.get('last_name'),
+                    'address_line1': request.form.get('address_line1'),
+                    'address_line2': request.form.get('address_line2'),
+                    'address_line3': request.form.get('address_line3'),
+                    'address_line4': request.form.get('address_line4'),
+                    'city': request.form.get('city'),
+                    'state': request.form.get('state'),
+                    'country': request.form.get('country'),
+                    'post_code': request.form.get('post_code'),
+                    'mobile_number': request.form.get('mobile_number'),
+                    'email_address': request.form.get('email_address'),
+                    'date_of_birth': request.form.get('date_of_birth'),
+                    'passport_number': request.form.get('passport_number'),
+                    'gender': request.form.get('gender'),
+                    'ethnicity': request.form.get('ethnicity'),
+                    'religion': request.form.get('religion')
+                }
+                
+                save_user_profile(user_id, profile_data)
+                flash('Profile updated successfully!')
+                return redirect(url_for('view_profile'))
+            except ValueError as e:
+                flash(str(e), 'error')
+        
+        # Retrieve existing profile
+        profile = get_user_profile(user_id)
+        
+        # Get list of countries
+        countries = get_country_list()
+        
+        return render_template('profile.html', 
+                               username=session['username'], 
+                               profile=profile, 
+                               countries=countries)
+                           
+                   
+
+    @app.route('/logout')
+    def logout():
+        session.pop('username', None)
+        return redirect(url_for('login'))
+
+    if __name__ == '__main__':
+        app.run(debug=True)

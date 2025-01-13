@@ -1,0 +1,12 @@
+Flask
+Flask-WTF
+pycountry
+WTForms
+PyPDF2
+python-dotenv
+pdf2image
+pytesseract
+transformers
+torch
+requests
+sentence-transformers 

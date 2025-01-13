@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Upload Form{% endblock %}
+{% block content %}
+<h2>Upload PDF Form</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<form method="POST" enctype="multipart/form-data" id="uploadForm">
+    {{ form.csrf_token }}
+    <div class="form-group">
+        {{ form.file.label }}
+        {{ form.file(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary" onclick="showLoading()">Upload</button>
+</form>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p id="loadingText">Processing your form...</p>
+    </div>
+</div>
+
+<style>
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loadingText {
+    font-size: 18px;
+    color: #333;
+}
+</style>
+
+<script>
+let loadingTexts = [
+    "Processing your form...",
+    "Extracting form fields...",
+    "Analyzing form structure...",
+    "Almost there..."
+];
+
+function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    let currentIndex = 0;
+    
+    // Change loading text every 2 seconds
+    setInterval(() => {
+        document.getElementById('loadingText').textContent = loadingTexts[currentIndex];
+        currentIndex = (currentIndex + 1) % loadingTexts.length;
+    }, 2000);
+}
+</script>
+{% endblock %} 

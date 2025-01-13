@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Fill Form{% endblock %}
+{% block content %}
+<h2>Fill Form Fields</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<form method="POST">
+    {{ form.csrf_token }}
+    
+    {% for field in form_fields %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.original_name }}{% if field.required %}*{% endif %}</label>
+        <input type="{{ field.type }}" 
+               id="{{ field.name }}" 
+               name="{{ field.name }}" 
+               value="{{ profile_data.get(field.name, '') }}"
+               class="form-control"
+               {% if field.required %}required{% endif %}
+               {% if profile_data.get(field.name) %}
+               title="Pre-filled from your profile"
+               style="background-color: #e8f0fe;"
+               {% endif %}>
+        {% if profile_data.get(field.name) %}
+        <small class="text-muted">Pre-filled from your profile</small>
+        {% endif %}
+    </div>
+    {% endfor %}
+    
+    <div style="margin-top: 20px;">
+        <button type="submit" class="btn" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin-right: 10px;">Review and Save</button>
+        <a href="{{ url_for('profile') }}" class="btn" style="display: inline-block; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Cancel</a>
+    </div>
+</form>
+
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .text-muted {
+        color: #6c757d;
+        font-size: 0.875em;
+    }
+</style>
+{% endblock %} 

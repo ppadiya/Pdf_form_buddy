@@ -18,15 +18,44 @@
     <div class="form-group">
         {{ form.file.label }}
         {{ form.file(class="form-control") }}
+        <small class="form-text text-muted">
+            Supported formats: PDF (text or scanned)
+        </small>
     </div>
     <button type="submit" class="btn btn-primary" onclick="showLoading()">Upload</button>
 </form>
+
+<!-- Processing Results -->
+{% if form_fields %}
+<div class="mt-4">
+    <h3>Detected Form Fields</h3>
+    <div class="alert alert-info">
+        <p>We detected the following fields in your form:</p>
+        <ul>
+            {% for field in form_fields %}
+            <li>
+                <strong>{{ field.label }}</strong>
+                <span class="badge badge-secondary">{{ field.type }}</span>
+                {% if field.required %}<span class="badge badge-danger">Required</span>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        <p>Please proceed to fill out the form.</p>
+    </div>
+    <a href="{{ url_for('fill_form') }}" class="btn btn-success">
+        Continue to Form Filling
+    </a>
+</div>
+{% endif %}
 
 <!-- Loading overlay -->
 <div id="loadingOverlay" style="display: none;">
     <div class="loading-content">
         <div class="spinner"></div>
         <p id="loadingText">Processing your form...</p>
+        <div class="progress mt-3" style="width: 50%;">
+            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
     </div>
 </div>
 
@@ -46,6 +75,10 @@
 
 .loading-content {
     text-align: center;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
 .spinner {
@@ -66,26 +99,43 @@
 #loadingText {
     font-size: 18px;
     color: #333;
+    margin-bottom: 1rem;
+}
+
+.progress {
+    height: 20px;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    transition: width 0.5s ease;
 }
 </style>
 
 <script>
 let loadingTexts = [
     "Processing your form...",
-    "Extracting form fields...",
-    "Analyzing form structure...",
+    "Extracting text content...",
+    "Detecting form fields...",
+    "Analyzing document structure...",
+    "Identifying required fields...",
     "Almost there..."
 ];
+
+let progressStages = [0, 20, 40, 60, 80, 100];
 
 function showLoading() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     let currentIndex = 0;
     
-    // Change loading text every 2 seconds
+    // Change loading text and progress every 2 seconds
     setInterval(() => {
-        document.getElementById('loadingText').textContent = loadingTexts[currentIndex];
-        currentIndex = (currentIndex + 1) % loadingTexts.length;
+        if (currentIndex < loadingTexts.length) {
+            document.getElementById('loadingText').textContent = loadingTexts[currentIndex];
+            document.getElementById('progressBar').style.width = progressStages[currentIndex] + '%';
+            currentIndex++;
+        }
     }, 2000);
 }
 </script>
-{% endblock %} 
+{% endblock %}

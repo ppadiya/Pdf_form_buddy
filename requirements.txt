@@ -9,4 +9,7 @@ pytesseract
 transformers
 torch
 requests
-sentence-transformers 
+sentence-transformers
+Pillow
+PyMuPDF
+pdfplumber

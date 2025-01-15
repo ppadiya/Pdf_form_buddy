@@ -1,0 +1,1565 @@
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+import os
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+import os
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# Initialize CSRF protection
+csrf = CSRFProtect()
+csrf.init_app(app)
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+ALLOWED_GENDERS = ['Male', 'Female', 'Other']
+ALLOWED_RELIGIONS = ['Christianity', 'Islam', 'Hinduism', 'Buddhism', 'Sikhism', 'Judaism', 'Other']
+
+# Initialize database when the app starts
+with app.app_context():
+    init_db()
+
+# Close database connection after each request
+@app.teardown_appcontext
+def teardown_db(exception):
+    close_db_connection()
+
+def get_country_list():
+    """Retrieve a sorted list of country names"""
+    return sorted([country.name for country in pycountry.countries])
+
+def is_english(text):
+    """Check if text is primarily in English"""
+    try:
+        return pycountry.languages.get(alpha_2='en').name in text
+    except:
+        return False
+
+def extract_text_from_pdf(pdf_path):
+    """Extract text from PDF using PyPDF2 with OCR fallback"""
+    try:
+        # First try regular text extraction
+        reader = PdfReader(pdf_path)
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+        
+        # If no text found, try OCR
+        if not text.strip():
+            images = convert_from_path(pdf_path)
+            text = ""
+            for image in images:
+                text += pytesseract.image_to_string(image) + "\n"
+        
+        return text.strip()
+    except Exception as e:
+        logger.error(f"Error extracting text from PDF: {str(e)}")
+        return ""
+
+def detect_form_fields(pdf_path):
+    """Detect form fields using pdfplumber"""
+    try:
+        detected_fields = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page_number, page in enumerate(pdf.pages):
+                # Extract text and form fields
+                text = page.extract_text()
+                form_fields = page.extract_words()
+                
+                # Process each word/field
+                for field in form_fields:
+                    if is_english(field['text']):
+                        detected_fields.append({
+                            'text': field['text'],
+                            'coordinates': (field['x0'], field['top'], field['x1'], field['bottom']),
+                            'page': page_number + 1
+                        })
+        
+        return detected_fields
+    except Exception as e:
+        logger.error(f"Error detecting form fields: {str(e)}")
+        return []
+
+def extract_form_fields(pdf_path):
+    """Extract form fields with improved detection"""
+    try:
+        # Get raw text
+        text = extract_text_from_pdf(pdf_path)
+        
+        # Detect fields using LayoutLM
+        detected_fields = detect_form_fields(pdf_path)
+        
+        # Process detected fields
+        fields = []
+        for field in detected_fields:
+            field_text = field['text']
+            if any(keyword in field_text.lower() for keyword in ['name', 'address', 'date', 'signature']):
+                fields.append({
+                    'name': field_text.lower().replace(' ', '_'),
+                    'label': field_text,
+                    'type': 'text',
+                    'required': True
+                })
+        
+        return {
+            'fields': fields,
+            'raw_text': text
+        }
+    except Exception as e:
+        logger.error(f"Error extracting form fields: {str(e)}")
+        return {'fields': [], 'raw_text': ''}
+
+@app.route('/')
+def index():
+    """Landing page that redirects to upload form"""
+    return redirect(url_for('upload_form'))
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_form():
+    """Handle PDF upload and form field extraction"""
+    form = UploadForm()
+    if form.validate_on_submit():
+        file = form.file.data
+        if file and file.filename.lower().endswith('.pdf'):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join('uploads', filename)
+            file.save(filepath)
+            
+            # Extract form fields
+            form_data = extract_form_fields(filepath)
+            
+            return render_template('fill_form.html', 
+                                fields=form_data['fields'],
+                                raw_text=form_data['raw_text'])
+        
+        flash('Invalid file type. Please upload a PDF file.')
+        return redirect(url_for('upload_form'))
+    
+    return render_template('upload_form.html', form=form)
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+import os
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+import os
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# Initialize CSRF protection
+csrf = CSRFProtect()
+csrf.init_app(app)
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+ALLOWED_GENDERS = ['Male', 'Female', 'Other']
+ALLOWED_RELIGIONS = ['Christianity', 'Islam', 'Hinduism', 'Buddhism', 'Sikhism', 'Judaism', 'Other']
+
+# Initialize database when the app starts
+with app.app_context():
+    init_db()
+
+# Close database connection after each request
+@app.teardown_appcontext
+def teardown_db(exception):
+    close_db_connection()
+
+def get_country_list():
+    """Retrieve a sorted list of country names"""
+    return sorted([country.name for country in pycountry.countries])
+
+def is_english(text):
+    """Check if text is primarily in English"""
+    try:
+        return pycountry.languages.get(alpha_2='en').name in text
+    except:
+        return False
+
+def extract_text_from_pdf(pdf_path):
+    """Extract text from PDF using PyPDF2 with OCR fallback"""
+    try:
+        # First try regular text extraction
+        reader = PdfReader(pdf_path)
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+        
+        # If no text found, try OCR
+        if not text.strip():
+            images = convert_from_path(pdf_path)
+            text = ""
+            for image in images:
+                text += pytesseract.image_to_string(image) + "\n"
+        
+        return text.strip()
+    except Exception as e:
+        logger.error(f"Error extracting text from PDF: {str(e)}")
+        return ""
+
+def detect_form_fields(pdf_path):
+    """Detect form fields using pdfplumber"""
+    try:
+        detected_fields = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page_number, page in enumerate(pdf.pages):
+                # Extract text and form fields
+                text = page.extract_text()
+                form_fields = page.extract_words()
+                
+                # Process each word/field
+                for field in form_fields:
+                    if is_english(field['text']):
+                        detected_fields.append({
+                            'text': field['text'],
+                            'coordinates': (field['x0'], field['top'], field['x1'], field['bottom']),
+                            'page': page_number + 1
+                        })
+        
+        return detected_fields
+    except Exception as e:
+        logger.error(f"Error detecting form fields: {str(e)}")
+        return []
+
+def extract_form_fields(pdf_path):
+    """Extract form fields with improved detection"""
+    try:
+        # Get raw text
+        text = extract_text_from_pdf(pdf_path)
+        
+        # Detect fields using LayoutLM
+        detected_fields = detect_form_fields(pdf_path)
+        
+        # Process detected fields
+        fields = []
+        for field in detected_fields:
+            field_text = field['text']
+            if any(keyword in field_text.lower() for keyword in ['name', 'address', 'date', 'signature']):
+                fields.append({
+                    'name': field_text.lower().replace(' ', '_'),
+                    'label': field_text,
+                    'type': 'text',
+                    'required': True
+                })
+        
+        return {
+            'fields': fields,
+            'raw_text': text
+        }
+    except Exception as e:
+        logger.error(f"Error extracting form fields: {str(e)}")
+        return {'fields': [], 'raw_text': ''}
+
+@app.route('/')
+def index():
+    """Landing page that redirects to upload form"""
+    return redirect(url_for('upload_form'))
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_form():
+    """Handle PDF upload and form field extraction"""
+    form = UploadForm()
+    if form.validate_on_submit():
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+import os
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+import os
+
+class UploadForm(FlaskForm):
+    file = FileField('PDF File', validators=[DataRequired()])
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from werkzeug.security import generate_password_hash, check_password_hash
+import pycountry
+from database import (
+    init_db, 
+    get_db_connection, 
+    with_db_connection, 
+    close_db_connection
+)
+from config import Config
+from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+import logging
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField
+from wtforms.validators import DataRequired, Length
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfReader, PdfWriter
+import requests
+from transformers import pipeline
+from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import pdfplumber
+
+
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# Initialize CSRF protection
+csrf = CSRFProtect()
+csrf.init_app(app)
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+ALLOWED_GENDERS = ['Male', 'Female', 'Other']
+ALLOWED_RELIGIONS = ['Christianity', 'Islam', 'Hinduism', 'Buddhism', 'Sikhism', 'Judaism', 'Other']
+
+# Initialize database when the app starts
+with app.app_context():
+    init_db()
+
+# Close database connection after each request
+@app.teardown_appcontext
+def teardown_db(exception):
+    close_db_connection()
+
+def get_country_list():
+    """Retrieve a sorted list of country names"""
+    return sorted([country.name for country in pycountry.countries])
+
+def is_english(text):
+    """Check if text is primarily in English"""
+    try:
+        return pycountry.languages.get(alpha_2='en').name in text
+    except:
+        return False
+
+def extract_text_from_pdf(pdf_path):
+    """Extract text from PDF using PyPDF2 with OCR fallback"""
+    try:
+        # First try regular text extraction
+        reader = PdfReader(pdf_path)
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+        
+        # If no text found, try OCR
+        if not text.strip():
+            images = convert_from_path(pdf_path)
+            text = ""
+            for image in images:
+                text += pytesseract.image_to_string(image) + "\n"
+        
+        return text.strip()
+    except Exception as e:
+        logger.error(f"Error extracting text from PDF: {str(e)}")
+        return ""
+
+def detect_form_fields(pdf_path):
+    """Detect form fields using pdfplumber"""
+    try:
+        detected_fields = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page_number, page in enumerate(pdf.pages):
+                # Extract text and form fields
+                text = page.extract_text()
+                form_fields = page.extract_words()
+                
+                # Process each word/field
+                for field in form_fields:
+                    if is_english(field['text']):
+                        detected_fields.append({
+                            'text': field['text'],
+                            'coordinates': (field['x0'], field['top'], field['x1'], field['bottom']),
+                            'page': page_number + 1
+                        })
+        
+        return detected_fields
+    except Exception as e:
+        logger.error(f"Error detecting form fields: {str(e)}")
+        return []
+
+def extract_form_fields(pdf_path):
+    """Extract form fields with improved detection"""
+    try:
+        # Get raw text
+        text = extract_text_from_pdf(pdf_path)
+        
+        # Detect fields using LayoutLM
+        detected_fields = detect_form_fields(pdf_path)
+        
+        # Process detected fields
+        fields = []
+        for field in detected_fields:
+            field_text = field['text']
+            if any(keyword in field_text.lower() for keyword in ['name', 'address', 'date', 'signature']):
+                fields.append({
+                    'name': field_text.lower().replace(' ', '_'),
+                    'label': field_text,
+                    'type': 'text',
+                    'required': True
+                })
+        
+        return {
+            'fields': fields,
+            'raw_text': text
+        }
+    except Exception as e:
+        logger.error(f"Error extracting form fields: {str(e)}")
+        return {'fields': [], 'raw_text': ''}
+
+@app.route('/')
+def index():
+    """Landing page that redirects to upload form"""
+    return redirect(url_for('upload_form'))
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_form():
+    """Handle PDF upload and form field extraction"""
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file selected')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected')
+            return redirect(request.url)
+        
+        if file and file.filename.lower().endswith('.pdf'):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join('uploads', filename)
+            file.save(filepath)
+            
+            # Extract form fields
+            form_data = extract_form_fields(filepath)
+            
+            return render_template('fill_form.html', 
+                                fields=form_data['fields'],
+                                raw_text=form_data['raw_text'])
+        
+        flash('Invalid file type. Please upload a PDF file.')
+        return redirect(request.url)
+    
+    return render_template('upload_form.html')
+
+# ... [rest of the existing app.py code remains unchanged]
+
+if __name__ == '__main__':
+    app.run(debug=True)

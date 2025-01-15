@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Fill Form{% endblock %}
 {% block content %}
-<h2>Fill Form Fields</h2>
+<h2>Fill Form</h2>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -13,47 +13,130 @@
     {% endif %}
 {% endwith %}
 
-<form method="POST">
+<form method="POST" id="fillForm">
     {{ form.csrf_token }}
     
-    {% for field in form_fields %}
-    <div class="form-group">
-        <label for="{{ field.name }}">{{ field.original_name }}{% if field.required %}*{% endif %}</label>
-        <input type="{{ field.type }}" 
-               id="{{ field.name }}" 
-               name="{{ field.name }}" 
-               value="{{ profile_data.get(field.name, '') }}"
-               class="form-control"
-               {% if field.required %}required{% endif %}
-               {% if profile_data.get(field.name) %}
-               title="Pre-filled from your profile"
-               style="background-color: #e8f0fe;"
-               {% endif %}>
-        {% if profile_data.get(field.name) %}
-        <small class="text-muted">Pre-filled from your profile</small>
-        {% endif %}
+    <div class="form-fields">
+        {% for field in form_fields %}
+        <div class="form-group">
+            <label for="{{ field.name }}">
+                {{ field.label }}
+                {% if field.required %}<span class="text-danger">*</span>{% endif %}
+            </label>
+            
+            {% if field.type == 'text' %}
+            <input type="text" 
+                   class="form-control" 
+                   id="{{ field.name }}" 
+                   name="{{ field.name }}"
+                   value="{{ field.value or '' }}"
+                   {% if field.required %}required{% endif %}>
+            
+            {% elif field.type == 'date' %}
+            <input type="date"
+                   class="form-control"
+                   id="{{ field.name }}"
+                   name="{{ field.name }}"
+                   value="{{ field.value or '' }}"
+                   {% if field.required %}required{% endif %}>
+            
+            {% elif field.type == 'select' %}
+            <select class="form-control"
+                    id="{{ field.name }}"
+                    name="{{ field.name }}"
+                    {% if field.required %}required{% endif %}>
+                {% for option in field.options %}
+                <option value="{{ option }}" 
+                        {% if field.value == option %}selected{% endif %}>
+                    {{ option }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            {% elif field.type == 'radio' %}
+            <div class="radio-group">
+                {% for option in field.options %}
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="{{ field.name }}_{{ loop.index }}"
+                           name="{{ field.name }}"
+                           value="{{ option }}"
+                           {% if field.value == option %}checked{% endif %}>
+                    <label class="form-check-label" for="{{ field.name }}_{{ loop.index }}">
+                        {{ option }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if field.description %}
+            <small class="form-text text-muted">
+                {{ field.description }}
+            </small>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
     
-    <div style="margin-top: 20px;">
-        <button type="submit" class="btn" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin-right: 10px;">Review and Save</button>
-        <a href="{{ url_for('profile') }}" class="btn" style="display: inline-block; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Cancel</a>
+    <div class="form-actions mt-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a href="{{ url_for('upload_form') }}" class="btn btn-secondary">Upload New Form</a>
     </div>
 </form>
 
 <style>
-    .form-group {
-        margin-bottom: 15px;
-    }
-    .form-control {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-    .text-muted {
-        color: #6c757d;
-        font-size: 0.875em;
-    }
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.radio-group {
+    padding: 0.5rem 0;
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid #eee;
+}
 </style>
-{% endblock %} 
+
+<script>
+// Auto-fill date fields with today's date if empty
+document.querySelectorAll('input[type="date"]').forEach(input => {
+    if (!input.value) {
+        const today = new Date().toISOString().split('T')[0];
+        input.value = today;
+    }
+});
+
+// Add input validation
+document.getElementById('fillForm').addEventListener('submit', function(e) {
+    let valid = true;
+    document.querySelectorAll('[required]').forEach(input => {
+        if (!input.value.trim()) {
+            valid = false;
+            input.classList.add('is-invalid');
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    if (!valid) {
+        e.preventDefault();
+        alert('Please fill out all required fields');
+    }
+});
+</script>
+{% endblock %}

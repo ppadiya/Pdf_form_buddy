@@ -2,37 +2,65 @@ import datetime
 import os
 import logging
 import json
+import re
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from openai import OpenAI
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('fieldextractor.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 class FieldExtractor:
-    PROMPT_TEMPLATE = """You are a form data extraction assistant. Analyze this form text and extract all relevant fields.
+    PROMPT_TEMPLATE = """You are a visa application form data extraction assistant. Analyze this form data and extract all relevant fields.
 
-Form text:
+Form data:
 {text}
 
 Required fields to extract (include any additional fields you find):
-- Full Name
-- Address (including street, city, state, zip)
-- Phone Number
-- Email
-- Date of Birth
-- Social Security Number (if present)
-- Employment Status (if present)
-- Income Information (if present)
-- Emergency Contact (if present)
+- Applicant Information:
+  - Full Name
+  - Date of Birth
+  - Nationality
+  - Passport Number
+  - Current Address
+  - Phone Number
+  - Email
+- Family Details:
+  - Spouse Information (if present)
+  - Children Information (if present)
+  - Family in Destination Country (if present)
+- Travel Information:
+  - Purpose of Visit
+  - Intended Arrival Date
+  - Intended Departure Date
+  - Previous Visits (if present)
+- Employment/Education:
+  - Current Occupation
+  - Employer/School Name
+  - Address
+  - Contact Information
+- Additional Information:
+  - Criminal History (if present)
+  - Health Information (if present)
+  - Financial Support Details
 
 Important instructions:
 1. Return ONLY a JSON object with the extracted fields
 2. Use null for missing fields
-3. Maintain the exact formatting found in the form
+3. Maintain the exact formatting found in the data
 4. Include any additional fields you find that seem important
-5. Group related fields into objects where appropriate
+5. Group related fields into nested objects where appropriate
+6. Ensure all field names are valid Python identifiers
+7. Pay special attention to family details and relationships
+8. Extract all text sections even if they don't match specific fields
 
 Return the JSON object only, no other text."""
 
@@ -47,119 +75,105 @@ Return the JSON object only, no other text."""
             base_url="https://api.deepseek.com"
         )
 
-    def clean_api_response(self, text: str) -> str:
-        """
-        Clean the API response text to ensure it contains valid JSON.
-        """
-        # Remove any potential markdown code block markers
-        text = text.replace('```json', '').replace('```', '').strip()
-        
-        # Find the first '{' and last '}' to extract just the JSON object
-        start = text.find('{')
-        end = text.rfind('}')
-        
-        if start == -1 or end == -1:
-            raise ValueError("No valid JSON object found in response")
-            
-        return text[start:end + 1]
+    def _validate_extracted_fields(self, fields: Dict) -> bool:
+        """Validate the structure of extracted fields"""
+        required_fields = {
+            'full_name',
+            'date_of_birth',
+            'nationality',
+            'passport_number',
+            'current_address',
+            'phone_number',
+            'email'
+        }
+        return all(field in fields for field in required_fields)
 
-    def extract_fields(self, ocr_result: Dict, output_path: Optional[str] = None) -> Dict:
-        """
-        Extract form fields from OCR result using DeepSeek API.
-        
-        Args:
-            ocr_result: Dictionary containing OCR results
-            output_path: Optional path to save extracted fields
-            
-        Returns:
-            Dictionary of extracted fields
-        """
+    def clean_api_response(self, text: str) -> Union[str, None]:
+        """Clean and validate the API response text to ensure it contains valid JSON."""
         try:
-            logger.info("Extracting fields from OCR result...")
+            # Remove any potential markdown code block markers
+            text = text.replace('```json', '').replace('```', '').strip()
+            
+            # Remove any trailing commas that might break JSON parsing
+            text = re.sub(r',\s*}', '}', text)
+            text = re.sub(r',\s*]', ']', text)
+            
+            # Find the first '{' and last '}' to extract just the JSON object
+            start = text.find('{')
+            end = text.rfind('}')
+            
+            if start == -1 or end == -1:
+                logger.error("No valid JSON object found in response")
+                return None
+                
+            json_str = text[start:end + 1]
+            
+            # Validate JSON by attempting to parse it
+            json.loads(json_str)
+            
+            return json_str
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON validation failed: {str(e)}")
+            logger.error(f"Problematic JSON content: {text}")
+            return None
 
-            # Combine text into a single string for processing
-            text_list = ocr_result.get("text", [])
-            if not text_list or not isinstance(text_list, list):
-                raise ValueError("OCR result must contain a 'text' field as a list of strings.")
-            text = "\n".join(text_list).strip()
-            if not text:
-                raise ValueError("No valid text found in OCR result.")
-
-            # Call DeepSeek API
+    def extract_fields(self, data: Union[Dict, str]) -> Dict:
+        """Extract form fields using DeepSeek API with robust error handling."""
+        try:
+            # Log the input data
+            logger.info("Starting field extraction")
+            
+            # Convert input data to string if it's a dict
+            input_text = json.dumps(data) if isinstance(data, dict) else str(data)
+            
+            # Prepare the API request with formatted prompt
+            formatted_prompt = self.PROMPT_TEMPLATE.format(text=input_text)
+            
+            request_messages = [
+                {"role": "system", "content": formatted_prompt},
+                {"role": "user", "content": input_text}
+            ]
+            
+            logger.debug("Sending API request")
+            
             response = self.client.chat.completions.create(
                 model="deepseek-chat",
-                messages=[{
-                    "role": "user",
-                    "content": self.PROMPT_TEMPLATE.format(text=text)
-                }],
+                messages=request_messages,
                 max_tokens=1024,
-                temperature=0.7
+                temperature=0.1  # Lower temperature for more consistent output
             )
-
-            # Log the API response for debugging
-            logger.info("Raw API Response:")
-            logger.info(f"Response content: {response.choices[0].message.content if response.choices else 'No content'}")
-
-            # Get the response content and clean it
-            if not response.choices or not response.choices[0].message:
-                raise ValueError("The API returned an empty response")
-                
-            content = response.choices[0].message.content.strip()
-            if not content:
-                raise ValueError("The API returned empty content")
-
-            # Clean and parse the response
-            try:
-                cleaned_content = self.clean_api_response(content)
-                logger.info(f"Cleaned content: {cleaned_content}")
-                result = json.loads(cleaned_content)
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON parsing failed even after cleaning. Content: {cleaned_content}")
-                logger.error(f"JSON error: {str(e)}")
-                raise ValueError(f"Failed to parse API response as JSON: {str(e)}")
             
-            # Add metadata
-            output = {
-                "source_pdf": ocr_result.get("pdf_path"),
-                "timestamp": str(datetime.datetime.now()),
-                "extracted_fields": result
+            if not response.choices or not response.choices[0].message:
+                logger.error("Empty response from API")
+                raise ValueError("Empty response from API")
+                
+            response_text = response.choices[0].message.content
+            logger.debug(f"Raw API response content: {response_text}")
+            
+            # Clean and parse the response
+            cleaned_response = self.clean_api_response(response_text)
+            if not cleaned_response:
+                raise ValueError("Failed to clean API response")
+                
+            extracted_fields = json.loads(cleaned_response)
+            
+            # Validate the extracted fields
+            if not self._validate_extracted_fields(extracted_fields):
+                logger.warning("Missing required fields in response")
+            
+            logger.info("Successfully extracted fields")
+            return {
+                "extracted_fields": extracted_fields,
+                "raw_response": response_text,
+                "status": "success"
             }
-
-            # Save if output path provided
-            if output_path:
-                output_path = Path(output_path)
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(output_path, 'w', encoding='utf-8') as f:
-                    json.dump(output, f, indent=2, ensure_ascii=False)
-                logger.info(f"Saved extracted fields to {output_path}")
-
-            return output
-
+                
         except Exception as e:
-            logger.error(f"Field extraction failed: {str(e)}")
-            raise
-
-def main():
-    import argparse
-    parser = argparse.ArgumentParser(description='Extract fields from OCR result')
-    parser.add_argument('ocr_path', help='Path to OCR JSON file')
-    parser.add_argument('--output', '-o', help='Output JSON path')
-    args = parser.parse_args()
-
-    try:
-        # Load OCR result
-        with open(args.ocr_path, 'r', encoding='utf-8') as f:
-            ocr_result = json.load(f)
-
-        # Extract fields
-        extractor = FieldExtractor()
-        result = extractor.extract_fields(ocr_result, args.output)
-        if not args.output:
-            print(json.dumps(result, indent=2))
-
-    except Exception as e:
-        logger.error(f"Error: {str(e)}")
-        exit(1)
-
-if __name__ == "__main__":
-    main()
+            logger.error(f"Field extraction failed: {str(e)}", exc_info=True)
+            return {
+                "extracted_fields": {},
+                "raw_response": "",
+                "status": "error",
+                "error": str(e)
+            }

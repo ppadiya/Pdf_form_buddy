@@ -10,13 +10,19 @@ from database import (
     close_db_connection
 )
 from config import Config
+from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 import logging
-from flask_wtf import FlaskForm
+from logging.handlers import RotatingFileHandler
 from wtforms import StringField, PasswordField, FileField
 from wtforms.validators import DataRequired, Length
 from werkzeug.utils import secure_filename
-from pdf_processor import PDFProcessor
+from ocr_processor import SmartPDFProcessor
+from fieldextractor import FieldExtractor
+
+# Create uploads directory if it doesn't exist
+if not os.path.exists('uploads'):
+    os.makedirs('uploads')
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -25,12 +31,35 @@ app.config.from_object(Config)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize PDF processor
-pdf_processor = PDFProcessor()
+# Create a file handler
+file_handler = RotatingFileHandler(
+    'app.log',
+    maxBytes=1024*1024,  # 1MB
+    backupCount=5
+)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+))
+
+# Create a stream handler
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+))
+
+# Add both handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
+logger.info("Application logging initialized")
+
+# Initialize processors
+pdf_processor = SmartPDFProcessor()
+field_extractor = FieldExtractor()
 
 ALLOWED_GENDERS = ['Male', 'Female', 'Other']
 ALLOWED_RELIGIONS = ['Christianity', 'Islam', 'Hinduism', 'Buddhism', 'Sikhism', 'Judaism', 'Other']
@@ -44,7 +73,18 @@ with app.app_context():
 def teardown_db(exception):
     close_db_connection()
 
-# [Rest of the existing app.py code remains the same until the upload_form route]
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[
+        DataRequired(message="Username is required"),
+        Length(min=3, max=50, message="Username must be between 3 and 50 characters")
+    ])
+    password = PasswordField('Password', validators=[
+        DataRequired(message="Password is required"),
+        Length(min=6, message="Password must be at least 6 characters")
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(message="Please confirm your password")
+    ])
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[
@@ -55,6 +95,18 @@ class LoginForm(FlaskForm):
         DataRequired(message="Password is required"),
         Length(min=6, message="Password must be at least 6 characters")
     ])
+
+@with_db_connection
+def create_user(conn, username, password):
+    """Create a new user in the database"""
+    hashed_password = generate_password_hash(password)
+    try:
+        conn.execute('INSERT INTO users (username, password) VALUES (?, ?)',
+                   (username, hashed_password))
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
 
 @with_db_connection
 def validate_user(conn, username, password):
@@ -83,29 +135,40 @@ def upload_form():
             filepath = os.path.join('uploads', filename)
             file.save(filepath)
             
-            # Use PDFProcessor to extract form fields
-            form_data = pdf_processor.process_pdf(filepath)
+            # Extract text from PDF
+            ocr_result = pdf_processor.process_pdf(filepath)
             
-            # Create a dynamic form based on extracted fields
-            class DynamicForm(FlaskForm):
-                pass
-            
-            for field in form_data['fields']:
-                setattr(DynamicForm, field['name'], StringField(field['label']))
-            
-            form = DynamicForm()
-            
-            return render_template('fill_form.html', 
-                                form=form,
-                                fields=form_data['fields'],
-                                raw_text=form_data['raw_text'])
+            try:
+                # Extract form fields using DeepSeek
+                logger.info("Starting field extraction process")
+                extracted = field_extractor.extract_fields({
+                    "text": [ocr_result["raw_text"]],
+                    "pdf_path": filepath
+                })
+                
+                logger.info(f"Field extraction result: {extracted}")
+                
+                if extracted.get('status') != 'success':
+                    logger.error(f"Field extraction failed: {extracted.get('error', 'Unknown error')}")
+                    flash('Failed to extract form fields. Please try again.')
+                    return redirect(url_for('upload_form'))
+                
+                from fill_form_handler import FillFormHandler
+                return FillFormHandler.handle_fill_form(
+                    extracted['extracted_fields'],
+                    ocr_result['raw_text'],
+                    extracted['raw_response']  # Pass raw response for debugging
+                )
+                
+            except Exception as e:
+                logger.error(f"Error during field extraction: {str(e)}", exc_info=True)
+                flash('An error occurred while processing your form. Please try again.')
+                return redirect(url_for('upload_form'))
         
         flash('Invalid file type. Please upload a PDF file.')
         return redirect(url_for('upload_form'))
     
     return render_template('upload_form.html', form=form)
-
-# [Rest of the existing app.py code remains the same]
 
 @app.route('/')
 def home():
@@ -231,6 +294,39 @@ def profile():
     return render_template('view_profile.html', 
                          username=session['username'],
                          profile=profile_data)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if 'username' in session:
+        return redirect(url_for('profile'))
+    
+    form = RegisterForm()
+    
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            username = form.username.data
+            password = form.password.data
+            confirm_password = form.confirm_password.data
+            
+            if password != confirm_password:
+                flash('Passwords do not match')
+                return redirect(url_for('register'))
+            
+            try:
+                if create_user(username, password):
+                    flash('Registration successful! Please login.')
+                    return redirect(url_for('login'))
+                else:
+                    flash('Username already exists')
+            except Exception as e:
+                logger.error(f"Registration error: {str(e)}")
+                flash('An error occurred during registration')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"{field}: {error}")
+    
+    return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

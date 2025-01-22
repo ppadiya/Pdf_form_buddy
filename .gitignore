@@ -1,0 +1,10 @@
+.env
+__pycache__/
+-p/
+.pytest_cache/
+Sample Files/
+tests/
+uploads/
+fieldextractor.log
+users.db
+Readme.docx
